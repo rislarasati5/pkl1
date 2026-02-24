@@ -1,5 +1,15 @@
 const Category = require('../models/category');
-const { categorySchema } = require('../validations/category_validation');
+const Joi = require('joi');
+
+// Schema langsung di controller
+const categorySchema = Joi.object({
+    name: Joi.string().min(3).required().messages({
+        'string.base': 'Name harus berupa string',
+        'string.empty': 'Name tidak boleh kosong',
+        'string.min': 'Name minimal 3 karakter',
+        'any.required': 'Name wajib diisi'
+    })
+});
 
 // GET ALL
 exports.getAll = async (req, res) => {
@@ -18,7 +28,9 @@ exports.getAll = async (req, res) => {
 exports.create = async (req, res) => {
     try {
         const { error } = categorySchema.validate(req.body);
-        if (error) return res.status(400).json({ message: error.message });
+        if (error) {
+            return res.status(400).json({ message: error.details[0].message });
+        }
 
         const result = await Category.create(req.body.name);
         res.status(201).json({
@@ -33,12 +45,10 @@ exports.create = async (req, res) => {
 // UPDATE
 exports.update = async (req, res) => {
     try {
-        if (!req.body || !req.body.name) {
-            return res.status(400).json({ message: 'Name wajib diisi' });
-        }
-
         const { error } = categorySchema.validate(req.body);
-        if (error) return res.status(400).json({ message: error.message });
+        if (error) {
+            return res.status(400).json({ message: error.details[0].message });
+        }
 
         const result = await Category.update(req.params.id, req.body.name);
         res.json({
