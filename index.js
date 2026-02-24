@@ -5,26 +5,29 @@ const fs = require('fs');
 const path = require('path');
 
 const userRoutes = require('./routes/user_route');
-const swaggerDocument = require('./utils/swagger');
 const postRoutes = require('./routes/post_route');
+const categoryRoutes = require('./routes/category_route');
+const swaggerDocument = require('./utils/swagger');
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-// Pastikan folder public/images ada
+// Folder images
 const imageDir = path.join(__dirname, 'public/images');
 if (!fs.existsSync(imageDir)) {
     fs.mkdirSync(imageDir, { recursive: true });
 }
 
-// Serve folder images agar bisa diakses via browser
-app.use('/images', express.static(path.join(__dirname, 'public/images')));
+// Static images
+app.use('/images', express.static(imageDir));
 
-// Routes
-app.use('/', userRoutes);
-app.use('/', postRoutes);
+// ===== ROUTES API =====
+app.use('/api', userRoutes);
+app.use('/api', postRoutes);
+app.use('/api', categoryRoutes);
 
 // Swagger
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
