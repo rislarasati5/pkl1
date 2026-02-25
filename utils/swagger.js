@@ -15,7 +15,7 @@ module.exports = {
     { name: 'Post', description: 'Manajemen Post' }
   ],
 
-  // 🔒 INI WAJIB BIAR AUTHORIZE MUNCUL
+  // INI WAJIB BIAR AUTHORIZE MUNCUL
   components: {
     securitySchemes: {
       bearerAuth: {
@@ -26,7 +26,7 @@ module.exports = {
     }
   },
 
-  // 🔒 GLOBAL AUTH (semua endpoint pakai token kecuali dikosongkan di swagger per endpoint)
+  // GLOBAL AUTH (semua endpoint pakai token kecuali dikosongkan di swagger per endpoint)
   security: [
     {
       bearerAuth: []

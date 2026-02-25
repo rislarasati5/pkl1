@@ -18,7 +18,7 @@ module.exports = {
                   },
                   password: {
                     type: 'string',
-                    example: 'password123'
+                    example: 'password'
                   }
                 },
                 required: ['email', 'password']
@@ -52,7 +52,7 @@ module.exports = {
                   },
                   password: {
                     type: 'string',
-                    example: 'password123'
+                    example: 'password'
                   }
                 },
                 required: ['email', 'password']

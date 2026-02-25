@@ -4,13 +4,14 @@ module.exports = {
       get: {
         tags: ['Post'],
         summary: 'Ambil semua post',
-        security: [], 
+        security: [],
         responses: {
           200: {
             description: 'List semua post berhasil diambil'
           }
         }
       },
+
       post: {
         tags: ['Post'],
         summary: 'Tambah post baru',
@@ -62,6 +63,7 @@ module.exports = {
           404: { description: 'Post tidak ditemukan' }
         }
       },
+
       put: {
         tags: ['Post'],
         summary: 'Update post berdasarkan ID',
@@ -101,6 +103,7 @@ module.exports = {
           404: { description: 'Post tidak ditemukan' }
         }
       },
+
       delete: {
         tags: ['Post'],
         summary: 'Hapus post berdasarkan ID',

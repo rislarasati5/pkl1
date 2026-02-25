@@ -32,6 +32,8 @@ app.use('/api', categoryRoutes);
 // Swagger
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
+app.get('/test', (req, res) => res.send('API Aktif!'));
+
 app.listen(PORT, () => {
     console.log(`🚀 Server: http://localhost:${PORT}`);
     console.log(`📘 Swagger: http://localhost:${PORT}/api-docs`);
