@@ -37,3 +37,5 @@ minioClient.setBucketPolicy(bucketName, JSON.stringify(policy), (err) => {
     }
     console.log(`Bucket "${bucketName}" sekarang sudah Public!`);
 });
+
+module.exports = minioClient;

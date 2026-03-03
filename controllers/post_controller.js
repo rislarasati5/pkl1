@@ -14,7 +14,7 @@ const uploadToMinio = async (file) => {
 
     const buffer = await sharp(file.buffer)
         .resize(800)
-        .jpeg({ quality: 80 })
+        .webp({ quality: 80 })
         .toBuffer();
 
     await minioClient.putObject(
@@ -22,7 +22,7 @@ const uploadToMinio = async (file) => {
         fileName,
         buffer,
         buffer.length,
-        { 'Content-Type': 'image/jpeg' }
+        { 'Content-Type': 'image/webp' }
     );
 
     return `http://localhost:9000/${BUCKET}/${fileName}`;
