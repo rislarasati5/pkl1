@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
-import { Routes, Route, Navigate } from "react-router-dom"; 
+import { Routes, Route, Navigate } from "react-router-dom";
 import AuthPage from "./pages/AuthPage";
 import CategoryPage from "./pages/CategoryPage";
-import Dashboard from "./pages/Dashboard"; // Import file Dashboard asli
+import Dashboard from "./pages/Dashboard";
 import PostUserPage from "./pages/PostUserPage";
 import MainLayout from "./components/MainLayout";
+import NotFound from "./pages/NotFound";
 
 function App() {
   const [token, setToken] = useState(localStorage.getItem("accessToken"));
@@ -19,18 +20,36 @@ function App() {
     };
   }, []);
 
-  if (!token) return <AuthPage />;
-
   return (
-    <MainLayout>
-      <Routes>
-        {/* Halaman utama langsung ke dashboard */}
-        <Route path="/" element={<Navigate to="/dashboard" />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/categories" element={<CategoryPage />} />
-        <Route path="/PostUserPage" element={<PostUserPage />} />
-      </Routes>
-    </MainLayout>
+    <Routes>
+      {/* 1. Halaman Publik */}
+      <Route path="/PostUserPage" element={<PostUserPage />} />
+
+      {!token ? (
+        /* 2. Jika BELUM LOGIN */
+        <>
+          <Route path="/" element={<AuthPage />} />
+          <Route path="*" element={<NotFound />} />
+        </>
+      ) : (
+        /* 3. Jika SUDAH LOGIN */
+        <Route
+          path="/*"
+          element={
+            <MainLayout>
+              <Routes>
+                <Route path="/" element={<Navigate to="/dashboard" />} />
+                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/categories" element={<CategoryPage />} />
+                
+                {/* Fallback kalau route dalam layout tidak ditemukan */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </MainLayout>
+          }
+        />
+      )}
+    </Routes>
   );
 }
 
