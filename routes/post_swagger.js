@@ -1,16 +1,38 @@
 module.exports = {
   paths: {
     '/posts': {
-      get: {
-        tags: ['Post'],
-        summary: 'Ambil semua post',
-        security: [],
-        responses: {
-          200: {
-            description: 'List semua post berhasil diambil'
-          }
+  get: {
+    tags: ['Post'],
+    summary: 'Ambil semua post dengan pagination',
+    security: [],
+    parameters: [
+      {
+        name: 'page',
+        in: 'query',
+        required: false,
+        description: 'Nomor halaman',
+        schema: {
+          type: 'integer',
+          example: 1
         }
       },
+      {
+        name: 'limit',
+        in: 'query',
+        required: false,
+        description: 'Jumlah data per halaman',
+        schema: {
+          type: 'integer',
+          example: 8
+        }
+      }
+    ],
+    responses: {
+      200: {
+        description: 'List post berhasil diambil'
+      }
+    }
+  },
 
       post: {
         tags: ['Post'],

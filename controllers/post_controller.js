@@ -33,8 +33,22 @@ const uploadToMinio = async (file) => {
 // ==================
 exports.getAll = async (req, res) => {
     try {
-        const data = await Post.getAll();
-        response.success(res, data.rows);
+
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 8;
+
+        const offset = (page - 1) * limit;
+
+        const data = await Post.getAll(limit, offset);
+        const total = await Post.countAll();
+
+        res.json({
+            data: data.rows,
+            currentPage: page,
+            totalData: total.rows[0].count,
+            totalPages: Math.ceil(total.rows[0].count / limit)
+        });
+
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
