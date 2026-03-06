@@ -4,6 +4,7 @@ import AuthPage from "./pages/AuthPage";
 import CategoryPage from "./pages/CategoryPage";
 import Dashboard from "./pages/Dashboard";
 import PostUserPage from "./pages/PostUserPage";
+import OrderAdminPage from "./pages/OrderAdminPage"; // TAMBAHKAN IMPORT INI
 import MainLayout from "./components/MainLayout";
 import NotFound from "./pages/NotFound";
 
@@ -29,6 +30,7 @@ function App() {
         /* 2. Jika BELUM LOGIN */
         <>
           <Route path="/" element={<AuthPage />} />
+          {/* Redirect ke login jika mencoba akses path lain tanpa token */}
           <Route path="*" element={<NotFound />} />
         </>
       ) : (
@@ -41,6 +43,9 @@ function App() {
                 <Route path="/" element={<Navigate to="/dashboard" />} />
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/categories" element={<CategoryPage />} />
+                
+                {/* TAMBAHKAN ROUTE PESANAN DI SINI */}
+                <Route path="/orders" element={<OrderAdminPage />} />
                 
                 {/* Fallback kalau route dalam layout tidak ditemukan */}
                 <Route path="*" element={<NotFound />} />

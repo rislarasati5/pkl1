@@ -10,6 +10,7 @@ const userRoutes = require('./routes/user_route');
 const postRoutes = require('./routes/post_route');
 const categoryRoutes = require('./routes/category_route');
 const swaggerDocument = require('./utils/swagger');
+const orderRoutes = require('./routes/order_routes');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -38,6 +39,7 @@ app.use('/images', express.static(imageDir));
 app.use('/api', userRoutes);     // Termasuk login & register
 app.use('/api', postRoutes);
 app.use('/api', categoryRoutes); // Metadata & Relations PostgreSQL
+app.use('/api/orders', orderRoutes);
 
 // 5. SWAGGER UI (Dokumentasi API)
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));

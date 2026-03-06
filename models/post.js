@@ -1,23 +1,38 @@
 const pool = require('../config/db');
 
-// GET semua post dengan pagination
-const getAll = (limit, offset) => {
+// ========================
+// GET ALL + SEARCH + PAGINATION
+// ========================
+const getAll = (limit, offset, search) => {
   return pool.query(
-    `SELECT posts.*, categories.name AS category_name
+    `SELECT 
+        posts.*, 
+        categories.name AS category_name
      FROM posts
-     LEFT JOIN categories ON posts.category_id = categories.id
+     LEFT JOIN categories 
+        ON posts.category_id = categories.id
+     WHERE posts.judul ILIKE $1
      ORDER BY posts.id DESC
-     LIMIT $1 OFFSET $2`,
-    [limit, offset]
+     LIMIT $2 OFFSET $3`,
+    [`%${search}%`, limit, offset]
   );
 };
 
-// hitung total data post
-const countAll = () => {
-  return pool.query(`SELECT COUNT(*) FROM posts`);
+// ========================
+// COUNT DATA
+// ========================
+const countAll = (search) => {
+  return pool.query(
+    `SELECT COUNT(*) 
+     FROM posts
+     WHERE judul ILIKE $1`,
+    [`%${search}%`]
+  );
 };
 
-// GET post by ID
+// ========================
+// GET BY ID
+// ========================
 const getById = (id) => {
   return pool.query(
     `SELECT posts.*, categories.name AS category_name
@@ -28,7 +43,9 @@ const getById = (id) => {
   );
 };
 
-// CREATE post
+// ========================
+// CREATE
+// ========================
 const create = (judul, isi, gambar, category_id) => {
   return pool.query(
     `INSERT INTO posts (judul, isi, gambar, category_id)
@@ -38,7 +55,9 @@ const create = (judul, isi, gambar, category_id) => {
   );
 };
 
-// UPDATE post
+// ========================
+// UPDATE
+// ========================
 const update = (id, judul, isi, gambar, category_id) => {
   return pool.query(
     `UPDATE posts
@@ -49,7 +68,9 @@ const update = (id, judul, isi, gambar, category_id) => {
   );
 };
 
-// DELETE post
+// ========================
+// DELETE
+// ========================
 const remove = (id) => {
   return pool.query(
     `DELETE FROM posts WHERE id=$1`,

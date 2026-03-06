@@ -32,28 +32,29 @@ const uploadToMinio = async (file) => {
 // GET ALL
 // ==================
 exports.getAll = async (req, res) => {
-    try {
+  try {
+    // Ambil parameter dari query string URL
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 8;
+    const search = req.query.search || ""; // PASTIKAN INI ADA
 
-        const page = parseInt(req.query.page) || 1;
-        const limit = parseInt(req.query.limit) || 8;
+    const offset = (page - 1) * limit;
 
-        const offset = (page - 1) * limit;
+    // Kirim search ke fungsi Model
+    const data = await Post.getAll(limit, offset, search);
+    const total = await Post.countAll(search);
 
-        const data = await Post.getAll(limit, offset);
-        const total = await Post.countAll();
+    res.json({
+      data: data.rows,
+      currentPage: page,
+      totalData: parseInt(total.rows[0].count),
+      totalPages: Math.ceil(parseInt(total.rows[0].count) / limit)
+    });
 
-        res.json({
-            data: data.rows,
-            currentPage: page,
-            totalData: total.rows[0].count,
-            totalPages: Math.ceil(total.rows[0].count / limit)
-        });
-
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 };
-
 // ==================
 // GET BY ID
 // ==================
