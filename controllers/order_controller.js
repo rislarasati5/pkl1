@@ -52,3 +52,31 @@ exports.deleteOrder = async (req, res) => {
     });
   }
 };
+
+// Tambahkan fungsi ini di file order_controller.js
+exports.updateStatus = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const { status } = req.body; // Mengambil status dari body request
+
+    const result = await Order.updateOrderStatus(id, status);
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "Pesanan tidak ditemukan"
+      });
+    }
+
+    res.json({
+      success: true,
+      message: `Status pesanan berhasil diubah menjadi ${status}`,
+      data: result.rows[0]
+    });
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: err.message
+    });
+  }
+};

@@ -100,5 +100,14 @@ const deleteOrder = async (id) => {
   }
 };
 
+const updateOrderStatus = async (id, status) => {
+  const query = `
+    UPDATE orders 
+    SET status = $1 
+    WHERE id = $2 
+    RETURNING *
+  `;
+  return pool.query(query, [status, id]);
+};
 
-module.exports = { createOrder, getAllOrders,deleteOrder};
+module.exports = { createOrder, getAllOrders,deleteOrder, updateOrderStatus};

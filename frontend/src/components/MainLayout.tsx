@@ -1,6 +1,6 @@
 import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "./ui/button";
-import { LogOut, LayoutDashboard, ListTree, ShoppingBag } from "lucide-react"; // Tambah ShoppingBag
+import { LogOut, LayoutDashboard, ListTree, ShoppingBag, History } from "lucide-react"; 
 
 export default function MainLayout({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();
@@ -27,13 +27,29 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
               <LayoutDashboard className="mr-2 h-4 w-4" /> Dashboard
             </Button>
             
-            {/* MENU BARU: PESANAN */}
             <Button 
               variant={location.pathname === "/orders" ? "secondary" : "ghost"} 
               className="w-full justify-start" 
               onClick={() => navigate("/orders")}
             >
               <ShoppingBag className="mr-2 h-4 w-4" /> Pesanan Masuk
+            </Button>
+
+            {/* MENU BARU: RIWAYAT PESANAN */}
+            <Button 
+              variant={location.pathname === "/order-history" ? "secondary" : "ghost"} 
+              className="w-full justify-start" 
+              onClick={() => navigate("/order-history")}
+            >
+              <History className="mr-2 h-4 w-4" /> Riwayat Pesanan
+            </Button>
+
+            <Button 
+              variant={location.pathname === "/tablepage" ? "secondary" : "ghost"} 
+              className="w-full justify-start" 
+              onClick={() => navigate("/tablepage")}
+            >
+              <ListTree className="mr-2 h-4 w-4" /> Nomor Meja
             </Button>
 
             <Button 

@@ -13,7 +13,8 @@ module.exports = {
     { name: 'Authentication', description: 'Login & Register User' },
     { name: 'Category', description: 'Manajemen Category' },
     { name: 'Post', description: 'Manajemen Post' },
-    { name: 'Orders', description: 'pesanan' }
+    { name: 'Orders', description: 'pesanan' },
+    { name: 'Table', description: 'nomor meja' }
   ],
 
   // INI WAJIB BIAR AUTHORIZE MUNCUL
@@ -39,5 +40,6 @@ module.exports = {
     ...require('../routes/category_swagger').paths,
     ...require('../routes/post_swagger').paths,
     ...require('../routes/order_swagger').paths,
+     ...require('../routes/table_swagger').paths,
   }
 };

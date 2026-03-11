@@ -63,34 +63,22 @@ module.exports = {
                 schema: {
                   type: 'object',
                   properties: {
-                    success: { 
-                      type: 'boolean', 
-                      example: true 
-                    },
-                    message: { 
-                      type: 'string', 
-                      example: 'Pesanan berhasil diproses' 
-                    },
-                    orderId: { 
-                      type: 'integer', 
-                      example: 1 
-                    }
+                    success: { type: 'boolean', example: true },
+                    message: { type: 'string', example: 'Pesanan berhasil diproses' },
+                    orderId: { type: 'integer', example: 1 }
                   }
                 }
               }
             }
           },
-          500: { 
-            description: 'Internal Server Error' 
-          }
+          500: { description: 'Internal Server Error' }
         }
       },
-
       get: {
         tags: ['Orders'],
         summary: 'Dapatkan semua daftar pesanan (Admin)',
         security: [],
-        description: 'Menampilkan riwayat pesanan beserta rincian item, jumlah, dan subtotal.',
+        description: 'Menampilkan riwayat pesanan beserta rincian item, jumlah, status, dan subtotal.',
         responses: {
           200: {
             description: 'Daftar pesanan berhasil diambil',
@@ -105,11 +93,8 @@ module.exports = {
                       nama_pemesan: { type: 'string' },
                       nomor_meja: { type: 'integer' },
                       total_harga: { type: 'integer' },
-                      status: { type: 'string' },
-                      created_at: { 
-                        type: 'string', 
-                        format: 'date-time' 
-                      },
+                      status: { type: 'string', example: 'pending' },
+                      created_at: { type: 'string', format: 'date-time' },
                       items: {
                         type: 'array',
                         items: {
@@ -128,27 +113,74 @@ module.exports = {
               }
             }
           },
-          500: {
-            description: 'Internal Server Error'
-          }
+          500: { description: 'Internal Server Error' }
         }
       }
     },
-
     '/orders/{id}': {
-      delete: {
+      put: {
         tags: ['Orders'],
-        summary: 'Hapus pesanan',
-        description: 'Menghapus pesanan berdasarkan ID',
+        summary: 'Update status pesanan (Selesaikan Pesanan)',
+        description: 'Mengubah status pesanan berdasarkan ID (Misal: pending ke selesai).',
         parameters: [
           {
             name: 'id',
             in: 'path',
             required: true,
-            schema: {
-              type: 'integer'
-            },
-            description: 'ID pesanan'
+            schema: { type: 'integer' },
+            description: 'ID pesanan yang akan diupdate'
+          }
+        ],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  status: { 
+                    type: 'string', 
+                    example: 'selesai',
+                    description: 'Status baru untuk pesanan (pending/selesai)'
+                  }
+                },
+                required: ['status']
+              }
+            }
+          }
+        },
+        responses: {
+          200: {
+            description: 'Status pesanan berhasil diperbarui',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean', example: true },
+                    message: { type: 'string', example: 'Status pesanan berhasil diubah menjadi selesai' },
+                    data: { type: 'object' }
+                  }
+                }
+              }
+            }
+          },
+          404: { description: 'Pesanan tidak ditemukan' },
+          500: { description: 'Internal Server Error' }
+        }
+      },
+      delete: {
+        tags: ['Orders'],
+        summary: 'Hapus pesanan (Hard Delete)',
+        security: [],
+        description: 'Menghapus data pesanan secara permanen dari database.',
+        parameters: [
+          {
+            name: 'id',
+            in: 'path',
+            required: true,
+            schema: { type: 'integer' },
+            description: 'ID pesanan yang akan dihapus'
           }
         ],
         responses: {
@@ -159,25 +191,15 @@ module.exports = {
                 schema: {
                   type: 'object',
                   properties: {
-                    success: { 
-                      type: 'boolean', 
-                      example: true 
-                    },
-                    message: { 
-                      type: 'string', 
-                      example: 'Pesanan berhasil dihapus' 
-                    }
+                    success: { type: 'boolean', example: true },
+                    message: { type: 'string', example: 'Pesanan berhasil dihapus' }
                   }
                 }
               }
             }
           },
-          404: {
-            description: 'Pesanan tidak ditemukan'
-          },
-          500: {
-            description: 'Internal Server Error'
-          }
+          404: { description: 'Pesanan tidak ditemukan' },
+          500: { description: 'Internal Server Error' }
         }
       }
     }

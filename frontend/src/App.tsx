@@ -4,7 +4,9 @@ import AuthPage from "./pages/AuthPage";
 import CategoryPage from "./pages/CategoryPage";
 import Dashboard from "./pages/Dashboard";
 import PostUserPage from "./pages/PostUserPage";
-import OrderAdminPage from "./pages/OrderAdminPage"; // TAMBAHKAN IMPORT INI
+import OrderAdminPage from "./pages/OrderAdminPage"; 
+import OrderHistory from "./pages/OrderHistory"; // IMPORT HALAMAN BARU
+import TablePage from "./pages/TablePage";
 import MainLayout from "./components/MainLayout";
 import NotFound from "./pages/NotFound";
 
@@ -23,7 +25,7 @@ function App() {
 
   return (
     <Routes>
-      {/* 1. Halaman Publik */}
+      {/* 1. Halaman Publik (Tanpa Login) */}
       <Route path="/PostUserPage" element={<PostUserPage />} />
 
       {!token ? (
@@ -31,7 +33,7 @@ function App() {
         <>
           <Route path="/" element={<AuthPage />} />
           {/* Redirect ke login jika mencoba akses path lain tanpa token */}
-          <Route path="*" element={<NotFound />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
         </>
       ) : (
         /* 3. Jika SUDAH LOGIN */
@@ -40,13 +42,19 @@ function App() {
           element={
             <MainLayout>
               <Routes>
-                <Route path="/" element={<Navigate to="/dashboard" />} />
+                {/* Arahkan root login ke dashboard */}
+                <Route path="/" element={<Navigate to="/dashboard" replace />} />
+                
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/categories" element={<CategoryPage />} />
+                <Route path="/tablepage" element={<TablePage />} />
                 
-                {/* TAMBAHKAN ROUTE PESANAN DI SINI */}
+                {/* ROUTE PESANAN AKTIF */}
                 <Route path="/orders" element={<OrderAdminPage />} />
                 
+                {/* ROUTE RIWAYAT PESANAN (BARU) */}
+                <Route path="/order-history" element={<OrderHistory />} />
+
                 {/* Fallback kalau route dalam layout tidak ditemukan */}
                 <Route path="*" element={<NotFound />} />
               </Routes>

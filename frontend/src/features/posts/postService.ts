@@ -1,15 +1,19 @@
 import { api } from "@/lib/axios";
 
+// postService.ts
+
 export const getPosts = async () => {
-  const res = await fetch("http://localhost:3000/api/posts");
+  const res = await fetch("http://localhost:3000/api/posts?limit=1000");
 
   if (!res.ok) {
     throw new Error("Gagal mengambil data");
   }
 
   const data = await res.json();
-
-  return data.data; // ambil array post nya
+  // Pastikan struktur return datanya benar
+  // Jika backend return { data: [...] } maka pakai data.data
+  // Jika backend return langsung [...] maka pakai data
+  return data.data || data; 
 };
 
 export const getPostsPaginated = async (page = 1, limit = 8, search = "") => {
@@ -61,29 +65,22 @@ export const postOrder = async (orderPayload: any) => {
   return res.json();
 };
 
+// Fungsi untuk menandai pesanan SELESAI (bukan menghapus permanen)
 // features/posts/postService.ts
+
+export const completeOrder = async (id: number) => {
+  // Ganti .patch menjadi .put agar sesuai dengan backend
+  const response = await api.put(`/orders/${id}`, { status: "selesai" });
+  return response.data;
+};
+
+// Ambil semua data (nantinya kita filter di masing-masing halaman)
 export const getAllOrders = async () => {
   try {
     const response = await api.get("/orders");
-
-    console.log("Response orders:", response.data);
-
-    // Jika backend return {data: [...]}
-    if (response.data.data) {
-      return response.data.data;
-    }
-
-    // Jika backend return langsung array
-    return response.data;
-
+    return response.data.data || response.data;
   } catch (error) {
     console.error("Error saat getAllOrders:", error);
     throw new Error("Gagal mengambil data pesanan");
   }
-};
-
-// Fungsi untuk menghapus pesanan yang sudah selesai
-export const deleteOrder = async (id: number) => {
-  const response = await api.delete(`/orders/${id}`);
-  return response.data;
 };
