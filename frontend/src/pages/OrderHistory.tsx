@@ -31,93 +31,63 @@ function OrderDetailModal({ order, onClose, menu }: any) {
   const totalItem = order.items?.reduce((acc: number, it: any) => acc + (it.qty || 1), 0);
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <Card className="w-full max-w-xl bg-white shadow-2xl border-0 overflow-hidden">
+    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+      <Card className="w-full max-w-xl bg-white shadow-2xl border-0">
 
-        <CardHeader className="bg-slate-900 text-white flex flex-row items-center justify-between p-6">
-          <div className="flex items-center gap-3">
-            <div className="bg-orange-500 p-2 rounded-lg">
-              <User size={20} className="text-white" />
-            </div>
+        <CardHeader className="bg-slate-900 text-white flex justify-between p-6">
 
-            <div>
-              <CardTitle className="text-xl uppercase">{order.nama_pemesan}</CardTitle>
-              <p className="text-xs text-slate-300">
-                Meja {order.nomor_meja} • {new Date(order.createdAt).toLocaleString("id-ID")}
-              </p>
-            </div>
+          <div>
+            <CardTitle className="text-xl uppercase">{order.nama_pemesan}</CardTitle>
+
+            <p className="text-xs text-slate-300">
+              Meja {order.nomor_meja} • {new Date(order.created_at).toLocaleString("id-ID")}
+            </p>
           </div>
 
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={onClose}
-            className="text-white hover:bg-white/10"
-          >
+          <Button variant="ghost" size="icon" onClick={onClose}>
             <X size={24} />
           </Button>
+
         </CardHeader>
 
         <CardContent className="p-6 space-y-6">
 
-          <div className="space-y-3">
-            <p className="font-bold text-sm text-slate-500 uppercase tracking-widest">
-              Detail Pesanan
-            </p>
+          <div className="border rounded-xl divide-y">
 
-            <div className="border rounded-xl divide-y">
+            {order.items?.map((item: any, idx: number) => {
 
-              {order.items?.map((item: any, idx: number) => {
+              const harga = getHargaMenu(item.judul);
+              const qty = item.qty || 1;
+              const subtotal = harga * qty;
 
-                const harga = getHargaMenu(item.judul);
-                const qty = item.qty || 1;
-                const subtotal = harga * qty;
+              return (
+                <div key={idx} className="p-3 flex justify-between">
 
-                return (
-                  <div key={idx} className="p-3 flex justify-between items-center bg-slate-50/30">
-
-                    <div>
-                      <span className="font-bold text-orange-600 mr-2">
-                        {qty}x
-                      </span>
-
-                      <span className="font-medium text-slate-800">
-                        {item.judul}
-                      </span>
-
-                      <div className="text-[11px] text-slate-400 ml-6">
-                        @Rp {harga.toLocaleString()}
-                      </div>
-                    </div>
-
-                    <span className="text-sm font-semibold text-slate-700">
-                      Rp {subtotal.toLocaleString()}
+                  <div>
+                    <span className="font-bold text-orange-600 mr-2">
+                      {qty}x
                     </span>
 
+                    {item.judul}
                   </div>
-                );
-              })}
 
-            </div>
+                  <span>
+                    Rp {subtotal.toLocaleString()}
+                  </span>
+
+                </div>
+              );
+            })}
+
           </div>
 
-          <div className="flex justify-between text-sm text-slate-500">
-            <span>Total Item</span>
-            <span>{totalItem}</span>
+          <div className="flex justify-between font-bold text-orange-600">
+            <span>Total</span>
+            <span>Rp {order.total_harga?.toLocaleString()}</span>
           </div>
 
-          <div className="flex justify-between items-center p-4 bg-orange-50 rounded-xl border border-orange-100">
-            <span className="font-bold text-slate-700">Total Pembayaran</span>
-            <span className="text-xl font-black text-orange-600">
-              Rp {order.total_harga?.toLocaleString()}
-            </span>
-          </div>
-
-          <Button
-            onClick={onClose}
-            className="w-full py-6 bg-slate-900 hover:bg-black font-bold"
-          >
-            Tutup Riwayat
+          <Button onClick={onClose} className="w-full">
+            Tutup
           </Button>
 
         </CardContent>
@@ -127,7 +97,11 @@ function OrderDetailModal({ order, onClose, menu }: any) {
 }
 
 export default function OrderHistory() {
+
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
+
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
 
   const { data: orders, isLoading } = useQuery({
     queryKey: ["orders-history"],
@@ -139,27 +113,44 @@ export default function OrderHistory() {
     queryFn: getPosts,
   });
 
-  const exportExcel = () => {
-    if (!orders) return;
+  const filteredOrders = orders?.filter((order: any) => {
 
-    const data = orders.map((o: any, i: number) => ({
+    if (!startDate && !endDate) return true;
+
+    if (!order.created_at) return true;
+
+    const orderDate = order.created_at.split("T")[0];
+
+    if (startDate && orderDate < startDate) return false;
+
+    if (endDate && orderDate > endDate) return false;
+
+    return true;
+
+  });
+
+  const exportExcel = () => {
+
+    if (!filteredOrders) return;
+
+    const data = filteredOrders.map((o: any, i: number) => ({
       No: i + 1,
       Pemesan: o.nama_pemesan,
       Meja: o.nomor_meja,
       Total: o.total_harga,
-      Waktu: new Date(o.createdAt).toLocaleString("id-ID"),
-      Items: o.items?.map((it: any) => `${it.judul} (${it.qty}x)`).join(", ")
+      Waktu: new Date(o.created_at).toLocaleString("id-ID")
     }));
 
     const ws = XLSX.utils.json_to_sheet(data);
     const wb = XLSX.utils.book_new();
 
     XLSX.utils.book_append_sheet(wb, ws, "Riwayat");
-    XLSX.writeFile(wb, "Laporan_Riwayat_Pesanan.xlsx");
+    XLSX.writeFile(wb, "Riwayat_Pesanan.xlsx");
   };
 
   const exportPDF = () => {
-    if (!orders) return;
+
+    if (!filteredOrders) return;
 
     const doc = new jsPDF();
 
@@ -167,12 +158,12 @@ export default function OrderHistory() {
 
     autoTable(doc, {
       head: [["No", "Pemesan", "Meja", "Total", "Waktu"]],
-      body: orders.map((o: any, i: number) => [
+      body: filteredOrders.map((o: any, i: number) => [
         i + 1,
         o.nama_pemesan,
         o.nomor_meja,
         `Rp ${o.total_harga?.toLocaleString()}`,
-        new Date(o.createdAt).toLocaleString("id-ID")
+        new Date(o.created_at).toLocaleString("id-ID")
       ]),
       startY: 20,
     });
@@ -183,51 +174,75 @@ export default function OrderHistory() {
   return (
     <div className="space-y-6">
 
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      <div className="flex justify-between items-center">
 
         <div>
-          <h1 className="text-3xl font-black text-slate-800 uppercase tracking-tight">
+          <h1 className="text-3xl font-black">
             Riwayat Pesanan
           </h1>
-          <p className="text-slate-500 text-sm italic">
-            Data pesanan yang telah diselesaikan dari dapur.
+
+          <p className="text-sm text-gray-500">
+            Data pesanan yang telah diselesaikan dari dapur
           </p>
         </div>
 
-        <div className="flex gap-2 w-full md:w-auto">
+        <div className="flex gap-2">
 
-          <Button
-            onClick={exportExcel}
-            variant="outline"
-            className="flex-1 border-emerald-600 text-emerald-600 hover:bg-emerald-50"
-          >
-            <FileSpreadsheet className="h-4 w-4 mr-2" />
+          <Button onClick={exportExcel}>
+            <FileSpreadsheet className="h-4 w-4 mr-2"/>
             Excel
           </Button>
 
-          <Button
-            onClick={exportPDF}
-            variant="outline"
-            className="flex-1 border-red-600 text-red-600 hover:bg-red-50"
-          >
-            <Download className="h-4 w-4 mr-2" />
+          <Button onClick={exportPDF}>
+            <Download className="h-4 w-4 mr-2"/>
             PDF
           </Button>
 
         </div>
+
       </div>
 
-      <Card className="border-0 shadow-xl rounded-2xl overflow-hidden">
+      {/* FILTER TANGGAL */}
+
+      <div className="flex gap-4">
+
+        <input
+          type="date"
+          value={startDate}
+          onChange={(e) => setStartDate(e.target.value)}
+          className="border px-3 py-2 rounded"
+        />
+
+        <input
+          type="date"
+          value={endDate}
+          onChange={(e) => setEndDate(e.target.value)}
+          className="border px-3 py-2 rounded"
+        />
+
+        <Button
+          variant="outline"
+          onClick={()=>{
+            setStartDate("")
+            setEndDate("")
+          }}
+        >
+          Reset
+        </Button>
+
+      </div>
+
+      <Card>
 
         <Table>
 
-          <TableHeader className="bg-slate-800">
-            <TableRow className="hover:bg-slate-800">
-              <TableHead className="text-white text-center w-16">NO</TableHead>
-              <TableHead className="text-white">PEMESAN</TableHead>
-              <TableHead className="text-white">MEJA</TableHead>
-              <TableHead className="text-white">TOTAL</TableHead>
-              <TableHead className="text-white text-right pr-10">AKSI</TableHead>
+          <TableHeader>
+            <TableRow>
+              <TableHead>No</TableHead>
+              <TableHead>Pemesan</TableHead>
+              <TableHead>Meja</TableHead>
+              <TableHead>Total</TableHead>
+              <TableHead>Aksi</TableHead>
             </TableRow>
           </TableHeader>
 
@@ -235,50 +250,43 @@ export default function OrderHistory() {
 
             {isLoading ? (
               <TableRow>
-                <TableCell colSpan={5} className="py-20 text-center">
-                  <Loader2 className="animate-spin inline mr-2" />
-                  Menarik data...
+                <TableCell colSpan={5} className="text-center">
+                  <Loader2 className="animate-spin inline mr-2"/>
+                  Loading...
                 </TableCell>
               </TableRow>
             ) : (
 
-              orders?.map((order: any, index: number) => (
+              filteredOrders?.map((order:any,index:number)=>(
+                <TableRow key={order.id}>
 
-                <TableRow key={order.id} className="hover:bg-slate-50 border-b">
+                  <TableCell>{index+1}</TableCell>
 
-                  <TableCell className="text-center">
-                    {index + 1}
-                  </TableCell>
-
-                  <TableCell className="font-bold uppercase">
+                  <TableCell className="font-bold">
                     {order.nama_pemesan}
                   </TableCell>
 
                   <TableCell>
-                    <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-bold">
-                      MEJA {order.nomor_meja}
-                    </span>
+                    MEJA {order.nomor_meja}
                   </TableCell>
 
-                  <TableCell className="font-bold text-orange-600">
+                  <TableCell className="text-orange-600 font-bold">
                     Rp {order.total_harga?.toLocaleString()}
                   </TableCell>
 
-                  <TableCell className="text-right pr-6">
+                  <TableCell>
 
                     <Button
                       variant="ghost"
-                      className="text-blue-600 hover:bg-blue-50 font-bold gap-2"
-                      onClick={() => setSelectedOrder(order)}
+                      onClick={()=>setSelectedOrder(order)}
                     >
-                      <Eye size={16} />
+                      <Eye size={16}/>
                       Lihat Detail
                     </Button>
 
                   </TableCell>
 
                 </TableRow>
-
               ))
 
             )}
@@ -291,7 +299,7 @@ export default function OrderHistory() {
 
       <OrderDetailModal
         order={selectedOrder}
-        onClose={() => setSelectedOrder(null)}
+        onClose={()=>setSelectedOrder(null)}
         menu={menu}
       />
 

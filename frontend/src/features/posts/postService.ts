@@ -67,7 +67,6 @@ export const postOrder = async (orderPayload: any) => {
 
 // Fungsi untuk menandai pesanan SELESAI (bukan menghapus permanen)
 // features/posts/postService.ts
-
 export const completeOrder = async (id: number) => {
   // Ganti .patch menjadi .put agar sesuai dengan backend
   const response = await api.put(`/orders/${id}`, { status: "selesai" });
@@ -83,4 +82,20 @@ export const getAllOrders = async () => {
     console.error("Error saat getAllOrders:", error);
     throw new Error("Gagal mengambil data pesanan");
   }
+};
+
+export const createPayment = async (paymentPayload: any) => {
+  const res = await fetch("http://localhost:3000/api/payment/create-payment", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(paymentPayload)
+  });
+
+  if (!res.ok) {
+    throw new Error("Gagal membuat transaksi pembayaran");
+  }
+
+  return res.json();
 };

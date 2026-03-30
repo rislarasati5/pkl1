@@ -7,40 +7,41 @@ const createOrder = async (orderData) => {
   try {
     await client.query('BEGIN');
 
-    // 1. Simpan Header Pesanan
     const orderQuery = `
       INSERT INTO orders (nama_pemesan, nomor_meja, total_harga) 
       VALUES ($1, $2, $3) RETURNING id
     `;
+
     const res = await client.query(orderQuery, [nama_pemesan, nomor_meja, total_harga]);
     const orderId = res.rows[0].id;
 
-    // 2. Simpan Detail Item secara Dinamis
     const itemQuery = `
       INSERT INTO order_items (order_id, post_id, qty, subtotal) 
       VALUES ($1, $2, $3, $4)
     `;
 
     for (const item of items) {
-      // Membersihkan string harga (misal "Rp 20.000" jadi 20000)
+
       const hargaSatuan = parseInt(item.isi.replace(/\D/g, ""));
-      
-      // Mengambil qty dari item, jika tidak ada default ke 1
       const kuantitas = item.qty || 1;
-      
-      // Menghitung subtotal per item (Harga x Jumlah Biji)
       const subtotalPerItem = hargaSatuan * kuantitas;
 
       await client.query(itemQuery, [orderId, item.id, kuantitas, subtotalPerItem]);
+
     }
 
     await client.query('COMMIT');
     return orderId;
+
   } catch (err) {
+
     await client.query('ROLLBACK');
     throw err;
+
   } finally {
+
     client.release();
+
   }
 };
 
@@ -67,22 +68,20 @@ const getAllOrders = async () => {
     GROUP BY o.id
     ORDER BY o.created_at DESC
   `;
+
   return pool.query(query);
 };
 
 const deleteOrder = async (id) => {
+
   const client = await pool.connect();
 
   try {
+
     await client.query('BEGIN');
 
-    // hapus dulu item pesanan
-    await client.query(
-      `DELETE FROM order_items WHERE order_id = $1`,
-      [id]
-    );
+    await client.query(`DELETE FROM order_items WHERE order_id = $1`, [id]);
 
-    // hapus header pesanan
     const result = await client.query(
       `DELETE FROM orders WHERE id = $1 RETURNING *`,
       [id]
@@ -93,21 +92,53 @@ const deleteOrder = async (id) => {
     return result;
 
   } catch (err) {
+
     await client.query('ROLLBACK');
     throw err;
+
   } finally {
+
     client.release();
+
   }
 };
 
 const updateOrderStatus = async (id, status) => {
+
   const query = `
     UPDATE orders 
     SET status = $1 
     WHERE id = $2 
     RETURNING *
   `;
+
   return pool.query(query, [status, id]);
+
 };
 
-module.exports = { createOrder, getAllOrders,deleteOrder, updateOrderStatus};
+/* ============================= */
+/* TAMBAHAN UNTUK MIDTRANS */
+/* ============================= */
+
+const updatePaymentStatus = async (midtrans_order_id, payment_status, payment_method) => {
+
+  const query = `
+    UPDATE orders
+    SET payment_status = $1,
+        payment_method = $2,
+        paid_at = NOW()
+    WHERE midtrans_order_id = $3
+    RETURNING *
+  `;
+
+  return pool.query(query, [payment_status, payment_method, midtrans_order_id]);
+
+};
+
+module.exports = { 
+  createOrder, 
+  getAllOrders,
+  deleteOrder, 
+  updateOrderStatus,
+  updatePaymentStatus
+};

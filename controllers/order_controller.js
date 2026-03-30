@@ -1,28 +1,46 @@
 const Order = require('../models/order');
+const midtransClient = require('midtrans-client');
+
+// KONFIGURASI MIDTRANS
+const snap = new midtransClient.Snap({
+  isProduction: false,
+  serverKey: process.env.MIDTRANS_SERVER_KEY,
+  clientKey: process.env.MIDTRANS_CLIENT_KEY
+});
 
 exports.checkout = async (req, res) => {
   try {
+
+    const { nama_pemesan, nomor_meja, total_harga, items } = req.body;
+
+    // SIMPAN ORDER KE DATABASE
     const orderId = await Order.createOrder(req.body);
+
     res.status(201).json({
       success: true,
       message: "Pesanan berhasil diproses",
       orderId: orderId
     });
+
   } catch (err) {
+
     res.status(500).json({
-      success: false,
       message: err.message
     });
+
   }
 };
 
 exports.listOrders = async (req, res) => {
   try {
     const orders = await Order.getAllOrders();
-    // Mengembalikan rows yang sudah mengandung array 'items'
+
     res.status(200).json(orders.rows);
+
   } catch (err) {
+
     res.status(500).json({ error: err.message });
+
   }
 };
 
@@ -46,18 +64,20 @@ exports.deleteOrder = async (req, res) => {
     });
 
   } catch (err) {
+
     res.status(500).json({
       success: false,
       message: err.message
     });
+
   }
 };
 
-// Tambahkan fungsi ini di file order_controller.js
 exports.updateStatus = async (req, res) => {
   try {
+
     const id = req.params.id;
-    const { status } = req.body; // Mengambil status dari body request
+    const { status } = req.body;
 
     const result = await Order.updateOrderStatus(id, status);
 
@@ -73,10 +93,13 @@ exports.updateStatus = async (req, res) => {
       message: `Status pesanan berhasil diubah menjadi ${status}`,
       data: result.rows[0]
     });
+
   } catch (err) {
+
     res.status(500).json({
       success: false,
       message: err.message
     });
+
   }
 };
